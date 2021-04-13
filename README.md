@@ -4,7 +4,7 @@
 
 ### First Step
 #### Download project
-`git clone`
+`git clone http://gitlab.groupbwt.com/belitskyi-av/dogs-vs-cats.git`
 ### Second step
 #### Install python requirements
 
@@ -24,7 +24,8 @@
  - Body: `{'image': 'your image file'}`
 
 ### Second mode: using 'main.py' script
-
+#### Create 'logs' directory in main folder
+`mkdir logs`
 #### Run script
 `python main.py`
  - `-i, --input-path` - path to your image or directory with images
