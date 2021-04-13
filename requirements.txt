@@ -1,0 +1,10 @@
+Flask==1.1.2
+Flask-API==2.0
+Flask-APIBlueprint==1.0.0
+Flask-RESTful==0.3.8
+Keras==2.4.3
+pillow==8.2.0
+python-magic==0.4.22
+pytest==6.2.3
+tensorflow==2.4.1
+tqdm==4.60.0
