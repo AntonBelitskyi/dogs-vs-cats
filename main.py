@@ -3,6 +3,7 @@ import os
 from functools import partial
 from os.path import isfile, join, basename, exists, isdir
 
+import PIL
 import click
 import tensorflow as tf
 from PIL import Image
@@ -31,9 +32,14 @@ def determine_image(prediction_model, input_path, logger, image_name):
         check_mimetype(filepath)
     except WrongMimeTypeError:
         logger.info(f"{'*' * 50}\n{basename(image_name)} - unsupported_file\n{'*' * 50}")
-    image = Image.open(filepath)
-    result = prediction_model.predict(image)
-    logger.info(f"{'*' * 50}\n{image_name} - {result}\n{'*' * 50}")
+    try:
+        image = Image.open(filepath)
+        result = prediction_model.predict(image)
+        logger.info(f"{'*' * 50}\n{image_name} - {result}\n{'*' * 50}")
+    except PIL.UnidentifiedImageError as e:
+        logger.info(f"{'*' * 50}\n{basename(image_name)} - cannot identify your image\n{'*' * 50}")
+
+
 
 
 @click.command()
@@ -60,10 +66,13 @@ def execute(predict_model, input_path):
     else:
         try:
             check_mimetype(input_path)
+            image = Image.open(input_path)
         except WrongMimeTypeError as e:
             logger.info(f"{'*' * 50}\n{basename(input_path)} - unsupported_file\n{'*' * 50}")
             raise e
-        image = Image.open(input_path)
+        except PIL.UnidentifiedImageError as e:
+            logger.info(f"{'*' * 50}\n{basename(input_path)} - cannot identify your image\n{'*' * 50}")
+            raise e
         result = prediction_model.predict(image)
         logger.info(f"{'*' * 50}\n{basename(input_path)} - {result}\n{'*' * 50}")
 
