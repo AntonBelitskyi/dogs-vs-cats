@@ -56,7 +56,7 @@ def execute(predict_model, input_path):
     prediction_model = prediction_model()
     if isdir(input_path):
         # Get all files from directory
-        images = [f for f in os.listdir(input_path) if isfile(join(input_path, f))][:100]
+        images = [f for f in os.listdir(input_path) if isfile(join(input_path, f))]
         images.sort()
         process_map(
             partial(determine_image, *(prediction_model, input_path, logger)),

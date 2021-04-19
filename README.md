@@ -29,7 +29,13 @@
 #### Run script
 `python main.py`
  - `-i, --input-path` - path to your image or directory with images
- - `-pm, --predict-model` - name of predict model
+ - `-pm, --predict-model` - name of predict model (ex. ```cats_and_dogs```)
+
+#### Check results
+All results are saved in ```logs/<predict model name>.log```
+
+You can run ```tail -f logs/<predict model name>.log``` in another terminal 
+to observe the result in real time.
 
 ## Run Tests
 `pytest -v`
