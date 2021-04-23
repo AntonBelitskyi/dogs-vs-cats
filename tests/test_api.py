@@ -2,13 +2,16 @@ import json
 from io import BytesIO
 
 from .testcases import BaseTestCase
-from predicts.constants import UNKNOWN_CLASS, CAT_AND_DOG
+from predicts.constants import UNKNOWN_CLASS, CAT, DOG
 
 FIXTURES = {
-    'cat_jpeg.jpg': CAT_AND_DOG.get("CAT"),
-    'cat_png.png': CAT_AND_DOG.get("CAT"),
-    'dog_jpeg.jpg': CAT_AND_DOG.get("DOG"),
-    'dog_png.png': CAT_AND_DOG.get("DOG"),
+    'cat_jpeg.jpg': CAT,
+    'cat_jpeg_rotate_90.jpg': CAT,
+    'cat_jpeg_rotate_180.jpg': CAT,
+    'cat_jpeg_rotate_270.jpg': CAT,
+    'cat_png.png': CAT,
+    'dog_jpeg.jpg': DOG,
+    'dog_png.png': DOG,
     'no_dog_and_no_cat_jpeg.jpg': UNKNOWN_CLASS,
     'no_dog_and_no_cat_png.png': UNKNOWN_CLASS,
 }
