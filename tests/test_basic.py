@@ -3,9 +3,11 @@ from unittest import mock
 from PIL import Image
 
 from predicts import CatsAndDogsModel, get_prediction_model
-from predicts.constants import CAT_AND_DOG, UNKNOWN_CLASS
+from predicts.constants import UNKNOWN_CLASS, CAT, DOG
 from tests.testcases import BaseTestCase
+from tests.test_api import FIXTURES as API_FIXTURES
 from utils import check_mimetype, WrongMimeTypeError
+
 
 FIXTURES = {
     'cat_jpeg.jpg': "image/jpeg",
@@ -48,18 +50,12 @@ class CatsAndDogsModelTestCase(BaseTestCase):
             self.assertEqual(processed_image.shape, (1, 224, 224, 3))
             self.assertIsInstance(processed_image, numpy.ndarray)
 
-    def test_read_dog_cat_labels(self):
-        cat_labels = self.predict_model.read_dog_cat_labels(CatsAndDogsModel.CAT_CLASSES_PATH)
-        self.assertEqual(len(cat_labels), 30)
-        dog_labels = self.predict_model.read_dog_cat_labels(CatsAndDogsModel.DOG_CLASSES_PATH)
-        self.assertEqual(len(dog_labels), 201)
-
     def test_is_dog_or_cat(self):
         is_cat = self.predict_model.is_dog_or_cat("tabby")
         is_dog = self.predict_model.is_dog_or_cat("Chihuahua")
         unknown_class = self.predict_model.is_dog_or_cat("octopus")
-        self.assertEqual(is_cat, CAT_AND_DOG.get("CAT"))
-        self.assertEqual(is_dog, CAT_AND_DOG.get("DOG"))
+        self.assertEqual(is_cat, CAT)
+        self.assertEqual(is_dog, DOG)
         self.assertEqual(unknown_class, UNKNOWN_CLASS)
 
     @mock.patch("predicts.predict_models.CatsAndDogsModel.is_dog_or_cat", lambda *args: "Dog")
@@ -68,14 +64,15 @@ class CatsAndDogsModelTestCase(BaseTestCase):
     @mock.patch("predicts.predict_models.imagenet_utils")
     @mock.patch("predicts.predict_models.ResNet50")
     def test_model_predict_return_dog(self, mock_resnet_50, mock_imagenet_utils):
+        self.predict_model = CatsAndDogsModel()
         results = [[
-            ("Unknown class", "class_description", 1),
-            ("Cat", "class_description", 2),
-            ("Dog", "class_description", 3)
+            (UNKNOWN_CLASS, "class_description", 1),
+            (CAT, "class_description", 2),
+            (DOG, "class_description", 3)
         ]]
         mock_resnet_50.return_value.predict.return_value = mock.Mock()
         mock_imagenet_utils.decode_predictions.return_value = results
-        self.assertEqual("Dog", self.predict_model.predict(mock.Mock()))
+        self.assertEqual(DOG, self.predict_model.predict(mock.Mock()))
 
 
     @mock.patch("predicts.predict_models.CatsAndDogsModel.is_dog_or_cat", lambda *args: "Cat")
@@ -84,29 +81,38 @@ class CatsAndDogsModelTestCase(BaseTestCase):
     @mock.patch("predicts.predict_models.imagenet_utils")
     @mock.patch("predicts.predict_models.ResNet50")
     def test_model_predict_return_cat(self, mock_resnet_50, mock_imagenet_utils):
+        self.predict_model = CatsAndDogsModel()
         results = [[
-            ("Unknown class", "class_description", 1),
-            ("Dog", "class_description", 2),
-            ("Cat", "class_description", 3)
+            (UNKNOWN_CLASS, "class_description", 1),
+            (DOG, "class_description", 2),
+            (CAT, "class_description", 3)
         ]]
         mock_resnet_50.return_value.predict.return_value = mock.Mock()
         mock_imagenet_utils.decode_predictions.return_value = results
-        self.assertEqual("Cat", self.predict_model.predict(mock.Mock()))
+        self.assertEqual(CAT, self.predict_model.predict(mock.Mock()))
 
     @mock.patch("predicts.predict_models.CatsAndDogsModel.is_dog_or_cat", lambda *args: "Unknown class")
     @mock.patch("predicts.predict_models.CatsAndDogsModel.read_dog_cat_labels", mock.Mock())
     @mock.patch("predicts.predict_models.CatsAndDogsModel.prepare_image", mock.Mock())
     @mock.patch("predicts.predict_models.imagenet_utils")
     @mock.patch("predicts.predict_models.ResNet50")
-    def test_model_predict_return_cat(self, mock_resnet_50, mock_imagenet_utils):
+    def test_model_predict_return_unknown_class(self, mock_resnet_50, mock_imagenet_utils):
+        self.predict_model = CatsAndDogsModel()
         results = [[
-            ("Cat", "class_description", 1),
-            ("Dog", "class_description", 2),
-            ("Unknown class", "class_description", 3)
+            (CAT, "class_description", 1),
+            (DOG, "class_description", 2),
+            (UNKNOWN_CLASS, "class_description", 3)
         ]]
         mock_resnet_50.return_value.predict.return_value = mock.Mock()
         mock_imagenet_utils.decode_predictions.return_value = results
-        self.assertEqual("Unknown class", self.predict_model.predict(mock.Mock()))
+        self.assertEqual(UNKNOWN_CLASS, self.predict_model.predict(mock.Mock()))
+
+    def test_model_predict_real_case(self):
+        for image_name, result in API_FIXTURES.items():
+            image_path = self.fixtures_dir + image_name
+            image = Image.open(image_path)
+            res = self.predict_model.predict(image)
+            self.assertEqual(res, result)
 
 
 class GetPredictionModelTestCase(BaseTestCase):
