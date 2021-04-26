@@ -1,13 +1,12 @@
 import logging
 import os
-from functools import partial
 from os.path import isfile, join, basename, exists, isdir
 
 import PIL
 import click
 import tensorflow as tf
+import tqdm
 from PIL import Image
-from tqdm.contrib.concurrent import process_map
 
 from predicts import get_prediction_model
 from utils import check_mimetype, WrongMimeTypeError
@@ -40,8 +39,6 @@ def determine_image(prediction_model, input_path, logger, image_name):
         logger.info(f"{'*' * 50}\n{basename(image_name)} - cannot identify your image\n{'*' * 50}")
 
 
-
-
 @click.command()
 @click.option("-i", "--input-path", required=True)
 @click.option("-pm", "--predict-model", required=True)
@@ -58,11 +55,8 @@ def execute(predict_model, input_path):
         # Get all files from directory
         images = [f for f in os.listdir(input_path) if isfile(join(input_path, f))]
         images.sort()
-        process_map(
-            partial(determine_image, *(prediction_model, input_path, logger)),
-            images,
-            max_workers=os.cpu_count()
-        )
+        for img in tqdm.tqdm(images, total=len(images)):
+            determine_image(prediction_model, input_path, logger, img)
     else:
         try:
             check_mimetype(input_path)
